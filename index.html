@@ -110,9 +110,8 @@
         }
     </style>
 
-    <!-- Inclusão dos scripts oficiais do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -129,7 +128,6 @@
 </div>
 
 <script>
-    // Suas credenciais do Firebase configuradas
     const firebaseConfig = {
         apiKey: "AIzaSyBuXB4vvqWrSZUQvyPQeDzz2Rrgyfv3hjg",
         authDomain: "albumcopa-13fae.firebaseapp.com",
@@ -140,12 +138,9 @@
         appId: "1:716820077727:web:632cf1d1afdc311b76d6aa"
     };
 
-    // Inicializando os módulos
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const docRef = db.collection("album").doc("progresso");
-
-    // CONTINUA NA PARTE 2...
+    const db = firebase.database();
+    const dbRef = db.ref("progresso");
     // Estrutura com os códigos das bandeiras oficiais de todas as 22 seleções
     const countryCodes = {
         "AUS (Austrália)": "au",
@@ -172,7 +167,7 @@
         "USA (Estados Unidos)": "us"
     };
 
-    // Suas figurinhas que vocês JÁ TÊM (Carregadas automaticamente no primeiro acesso se o banco estiver vazio)
+    // Figurinhas que você JÁ TEM (carregadas no banco se ele estiver vazio)
     const initialOwned = {
         "FWC (Especiais / Logos)": [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18],
         "MEX (México)": [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20],
@@ -200,8 +195,7 @@
 
     const container = document.getElementById('album-list');
     let currentState = {};
-
-    // Monta a interface na tela com grids de 1 a 20 para cada país
+    // Cria a interface na tela com os cartões e números de 1 a 20
     Object.keys(countryCodes).forEach(country => {
         const card = document.createElement('div');
         card.className = 'country-card';
@@ -232,23 +226,17 @@
             btn.innerText = num;
             
             const idUnique = `${country}-${num}`;
-            btn.dataset.id = idUnique; 
             btn.id = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-            // Quando clicar na figurinha, envia a atualização direto pro Firebase
+            // Evento de clique para guardar diretamente no Realtime Database
             btn.addEventListener('click', () => {
                 const isChecked = btn.classList.contains('checked');
-                
-                // Atualiza localmente rápido para dar sensação de clique instantâneo
                 btn.classList.toggle('checked');
                 
-                // Salva a alteração no documento único do banco de dados
-                docRef.set({
-                    [idUnique]: !isChecked
-                }, { merge: true }).catch(err => {
-                    console.error("Erro ao salvar no banco: ", err);
-                    // Desfaz a cor do botão se a gravação falhar (ex: falta de internet)
-                    btn.classList.toggle('checked');
+                // Grava a alteração (true ou null para apagar se desmarcar)
+                dbRef.child(idUnique).set(!isChecked ? true : null).catch(err => {
+                    console.error("Erro ao guardar: ", err);
+                    btn.classList.toggle('checked'); // Desfaz se falhar
                 });
             });
 
@@ -259,31 +247,26 @@
         container.appendChild(card);
     });
 
-    // 🔄 O SEGREDO DO TEMPO REAL: Fica ouvindo o banco de dados sem parar
-    docRef.onSnapshot((doc) => {
-        if (doc.exists) {
-            currentState = doc.data();
-            applyStateToUI();
-        } else {
-            // Se o banco de dados estiver totalmente limpo, cria ele com a sua lista inicial
-            let startData = {};
-            Object.keys(initialOwned).forEach(country => {
-                initialOwned[country].forEach(num => {
-                    startData[`${country}-${num}`] = true;
-                });
+    // 🔄 Escuta ativa em tempo real do Realtime Database
+    dbRef.on('value', (snapshot) => {
+        currentState = snapshot.val() || {};
+        applyStateToUI();
+    }, (error) => {
+        // Se o banco estiver vazio no primeiro acesso, carrega a lista inicial
+        let startData = {};
+        Object.keys(initialOwned).forEach(country => {
+            initialOwned[country].forEach(num => {
+                startData[`${country}-${num}`] = true;
             });
-            docRef.set(startData);
-        }
+        });
+        dbRef.set(startData);
     });
 
-    // Aplica visualmente as marcações verdes que vieram da nuvem
+    // Atualiza visualmente os botões verdes com os dados vindos da nuvem
     function applyStateToUI() {
         const allButtons = document.querySelectorAll('.sticker');
-        
-        // Primeiro limpa o estado de tudo
         allButtons.forEach(btn => btn.classList.remove('checked'));
 
-        // Depois acende as que estão marcadas como "true" na nuvem
         Object.keys(currentState).forEach(idUnique => {
             if (currentState[idUnique] === true) {
                 const safeId = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -295,7 +278,7 @@
         updateProgress();
     }
 
-    // Atualiza a barra vermelha e os contadores numéricos
+    // Atualiza a barra superior e as contagens por país
     function updateProgress() {
         const totalStickers = document.querySelectorAll('.sticker').length;
         const checkedStickers = document.querySelectorAll('.sticker.checked').length;
@@ -308,7 +291,6 @@
         Object.keys(countryCodes).forEach(country => {
             const countryCard = document.getElementById(`count-${country}`).closest('.country-card');
             const checkedCountry = countryCard.querySelectorAll('.sticker.checked').length;
-            
             document.getElementById(`count-${country}`).innerText = `Temos: ${checkedCountry}/20`;
         });
     }
