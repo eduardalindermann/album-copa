@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Figurinhas - Com Bandeiras Oficiais</title>
+    <title>Controle de Figurinhas - Nuvem Efêmera</title>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -61,6 +61,31 @@
             font-size: 14px;
             margin-top: 5px;
             display: block;
+        }
+
+        .action-box {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #610f27;
         }
 
         .country-card {
@@ -133,10 +158,6 @@
             text-decoration: line-through;
             opacity: 0.6;
         }
-
-        .sticker:active {
-            transform: scale(0.95);
-        }
     </style>
 </head>
 <body>
@@ -150,11 +171,15 @@
         <span id="stats-text">Carregando dados...</span>
     </header>
 
+    <div class="action-box">
+        <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">Clique abaixo para gerar um link atualizado com suas marcações para abrir em qualquer lugar:</p>
+        <button class="btn" onclick="generateShareLink()">🔗 Salvar e Gerar Link de Compartilhamento</button>
+    </div>
+
     <div id="album-list"></div>
 </div>
 
 <script>
-    // Dados com códigos de país ISO de 2 letras para buscar as imagens corretas
     const data = {
         "AUS (Austrália)": { code: "au", list: [1, 2, 3, 5, 6, 9, 10, 11, 14, 15, 17, 18] },
         "BIH (Bósnia e Herzegovina)": { code: "ba", list: [1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 18, 19, 20] },
@@ -174,14 +199,31 @@
         "PAR (Paraguai)": { code: "py", list: [1, 3, 4, 5, 8, 17] },
         "QAT (Catar)": { code: "qa", list: [1, 2, 4, 6, 8, 9, 10, 12, 18, 19, 20] },
         "RSA (África do Sul)": { code: "za", list: [2, 3, 5, 6, 7, 9, 11, 19] },
-        "SCO (Escócia)": { code: "gb-sct", list: [1, 2, 16] }, // Código específico da Escócia
+        "SCO (Escócia)": { code: "gb-sct", list: [1, 2, 16] },
         "SUI (Suíça)": { code: "ch", list: [3, 4, 7, 10, 11, 13, 15, 17, 18, 19, 20] },
         "TUR (Turquia)": { code: "tr", list: [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 17, 18, 19] },
         "USA (Estados Unidos)": { code: "us", list: [2, 7, 11, 17, 18] }
     };
 
     const container = document.getElementById('album-list');
-    const savedState = JSON.parse(localStorage.getItem('copaStickersState')) || {};
+    
+    // Tenta ler os dados salvos primeiro pela URL (link compartilhado) ou depois pelo LocalStorage do aparelho
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlData = urlParams.get('d');
+    let savedState = {};
+
+    if (urlData) {
+        try {
+            // Decodifica os dados vindos da URL
+            savedState = JSON.parse(atob(urlData));
+            // Salva no localstorage também para garantir backup
+            localStorage.setItem('copaStickersState', JSON.stringify(savedState));
+        } catch(e) {
+            console.error("Erro ao ler dados da URL");
+        }
+    } else {
+        savedState = JSON.parse(localStorage.getItem('copaStickersState')) || {};
+    }
 
     Object.keys(data).forEach(country => {
         const card = document.createElement('div');
@@ -193,14 +235,7 @@
         const name = document.createElement('span');
         name.className = 'country-name';
         
-        // Define se usa a imagem de uma bandeira ou o ícone de troféu para o FWC
-        let flagHtml = '';
-        if (data[country].code === 'fwc') {
-            flagHtml = `<span style="font-size:20px;">🏆</span>`;
-        } else {
-            flagHtml = `<img class="flag-img" src="https://flagcdn.com/w40/${data[country].code}.png" alt="Bandeira">`;
-        }
-        
+        let flagHtml = data[country].code === 'fwc' ? `<span style="font-size:20px;">🏆</span>` : `<img class="flag-img" src="https://flagcdn.com/w40/${data[country].code}.png" alt="Bandeira">`;
         name.innerHTML = `${flagHtml} ${country}`;
 
         const count = document.createElement('span');
@@ -261,6 +296,22 @@
             const checkedCountry = countryCard.querySelectorAll('.sticker.checked').length;
             
             document.getElementById(`count-${country}`).innerText = `Restam: ${totalCountry - checkedCountry}`;
+        });
+    }
+
+    function generateShareLink() {
+        // Transforma o estado atual em um texto codificado leve para colocar na URL
+        const base64Data = btoa(JSON.stringify(savedState));
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?d=' + base64Data;
+        
+        // Atualiza a barra de endereço do navegador
+        window.history.pushState({path:newUrl},'',newUrl);
+        
+        // Copia automaticamente para a área de transferência
+        navigator.clipboard.writeText(newUrl).then(() => {
+            alert("Link de compartilhamento copiado! Guarde esse link ou envie para outro aparelho para manter suas marcações.");
+        }).catch(err => {
+            alert("Link gerado na barra de endereços do seu navegador! Copie lá em cima.");
         });
     }
 
