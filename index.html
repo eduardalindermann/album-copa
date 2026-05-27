@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Figurinhas - Com Bandeiras Oficiais</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary-color: #8a1538;
+            --accent-color: #4caf50;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 3px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background: var(--accent-color);
+            width: 0%;
+            height: 12px;
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        #stats-text {
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .country-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .country-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .country-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flag-img {
+            width: 24px;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .country-count {
+            font-size: 12px;
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .stickers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 8px;
+        }
+
+        .sticker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            user-select: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .sticker.checked {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .sticker:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Meus Faltantes - Copa</h1>
+        <div class="progress-container">
+            <div class="progress-bar" id="main-progress"></div>
+        </div>
+        <span id="stats-text">Carregando dados...</span>
+    </header>
+
+    <div id="album-list"></div>
+</div>
+
+<script>
+    // Dados com códigos de país ISO de 2 letras para buscar as imagens corretas
+    const data = {
+        "AUS (Austrália)": { code: "au", list: [1, 2, 3, 5, 6, 9, 10, 11, 14, 15, 17, 18] },
+        "BIH (Bósnia e Herzegovina)": { code: "ba", list: [1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 18, 19, 20] },
+        "BRA (Brasil)": { code: "br", list: [3, 4, 7, 8, 9, 11, 12, 16, 17, 19, 20] },
+        "CAN (Canadá)": { code: "ca", list: [2, 3, 8, 9, 17, 18, 20] },
+        "CIV (Costa do Marfim)": { code: "ci", list: [3, 5, 8, 9, 10, 12, 13, 15, 19, 20] },
+        "CUW (Curaçao)": { code: "cw", list: [1, 3, 5, 14, 16] },
+        "CZE (Chéquia)": { code: "cz", list: [1, 3, 4, 5, 7, 9, 11, 13, 14, 16, 17, 18, 20] },
+        "ECU (Equador)": { code: "ec", list: [8, 12, 13, 16, 20] },
+        "FWC (Especiais / Logos)": { code: "fwc", list: [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18] },
+        "GER (Alemanha)": { code: "de", list: [1, 2, 3, 6, 7, 9, 10, 12, 13, 15, 17, 19] },
+        "HAI (Haiti)": { code: "ht", list: [1, 3, 4, 7, 8, 9, 12, 13, 14, 17, 20] },
+        "KOR (Coreia do Sul)": { code: "kr", list: [2, 5, 6, 7, 13, 17, 19] },
+        "MAR (Marrocos)": { code: "ma", list: [3, 10, 14, 16, 19, 20] },
+        "MEX (México)": { code: "mx", list: [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20] },
+        "NED (Países Baixos)": { code: "nl", list: [1, 2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 18, 19, 20] },
+        "PAR (Paraguai)": { code: "py", list: [1, 3, 4, 5, 8, 17] },
+        "QAT (Catar)": { code: "qa", list: [1, 2, 4, 6, 8, 9, 10, 12, 18, 19, 20] },
+        "RSA (África do Sul)": { code: "za", list: [2, 3, 5, 6, 7, 9, 11, 19] },
+        "SCO (Escócia)": { code: "gb-sct", list: [1, 2, 16] }, // Código específico da Escócia
+        "SUI (Suíça)": { code: "ch", list: [3, 4, 7, 10, 11, 13, 15, 17, 18, 19, 20] },
+        "TUR (Turquia)": { code: "tr", list: [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 17, 18, 19] },
+        "USA (Estados Unidos)": { code: "us", list: [2, 7, 11, 17, 18] }
+    };
+
+    const container = document.getElementById('album-list');
+    const savedState = JSON.parse(localStorage.getItem('copaStickersState')) || {};
+
+    Object.keys(data).forEach(country => {
+        const card = document.createElement('div');
+        card.className = 'country-card';
+
+        const header = document.createElement('div');
+        header.className = 'country-header';
+        
+        const name = document.createElement('span');
+        name.className = 'country-name';
+        
+        // Define se usa a imagem de uma bandeira ou o ícone de troféu para o FWC
+        let flagHtml = '';
+        if (data[country].code === 'fwc') {
+            flagHtml = `<span style="font-size:20px;">🏆</span>`;
+        } else {
+            flagHtml = `<img class="flag-img" src="https://flagcdn.com/w40/${data[country].code}.png" alt="Bandeira">`;
+        }
+        
+        name.innerHTML = `${flagHtml} ${country}`;
+
+        const count = document.createElement('span');
+        count.className = 'country-count';
+        count.id = `count-${country}`;
+        
+        header.appendChild(name);
+        header.appendChild(count);
+        card.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'stickers-grid';
+
+        data[country].list.forEach(num => {
+            const btn = document.createElement('div');
+            btn.className = 'sticker';
+            btn.innerText = num;
+            
+            const idUnique = `${country}-${num}`;
+            btn.dataset.id = idUnique; 
+
+            if (savedState[idUnique]) {
+                btn.classList.add('checked');
+            }
+            
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('checked');
+                
+                if (btn.classList.contains('checked')) {
+                    savedState[idUnique] = true;
+                } else {
+                    delete savedState[idUnique];
+                }
+                
+                localStorage.setItem('copaStickersState', JSON.stringify(savedState));
+                updateProgress();
+            });
+
+            grid.appendChild(btn);
+        });
+
+        card.appendChild(grid);
+        container.appendChild(card);
+    });
+
+    function updateProgress() {
+        const totalStickers = document.querySelectorAll('.sticker').length;
+        const checkedStickers = document.querySelectorAll('.sticker.checked').length;
+        const missing = totalStickers - checkedStickers;
+        
+        const percentage = totalStickers > 0 ? (checkedStickers / totalStickers) * 100 : 0;
+        document.getElementById('main-progress').style.width = `${percentage}%`;
+        document.getElementById('stats-text').innerText = `Você conseguiu ${checkedStickers} de ${totalStickers} figurinhas da lista. Restam ${missing}!`;
+
+        Object.keys(data).forEach(country => {
+            const countryCard = document.getElementById(`count-${country}`).closest('.country-card');
+            const totalCountry = countryCard.querySelectorAll('.sticker').length;
+            const checkedCountry = countryCard.querySelectorAll('.sticker.checked').length;
+            
+            document.getElementById(`count-${country}`).innerText = `Restam: ${totalCountry - checkedCountry}`;
+        });
+    }
+
+    updateProgress();
+</script>
+
+</body>
+</html>
