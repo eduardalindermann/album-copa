@@ -257,11 +257,12 @@
 
             // Evento de clique para guardar diretamente no Realtime Database
            btn.addEventListener('click', () => {
-                const senhaAtual = localStorage.getItem('album_senha') || "";
-                
-                // Validação local da senha antes de enviar para o banco
-                if (senhaAtual !== '111225') {
-                    alert("Acesso Negado! Verifique a sua senha no topo da página.");
+                // Verifica se a URL contém o comando secreto para liberar a edição
+                const urlParams = new URLSearchParams(window.location.search);
+                const podeEditar = urlParams.get('editar');
+
+                if (podeEditar !== 'sim') {
+                    alert("Acesso Negado! Este link é apenas para visualização.");
                     return;
                 }
 
@@ -270,10 +271,9 @@
                 
                 dbRef.child(idUnique).set(!isChecked ? true : null).catch(err => {
                     console.error("Erro na sincronização: ", err);
-                    btn.classList.toggle('checked'); // Desfaz se houver erro de rede
+                    btn.classList.toggle('checked');
                 });
             });
-
             grid.appendChild(btn);
         }
 
