@@ -141,33 +141,61 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const dbRef = db.ref("progresso");
-    // Estrutura com os códigos das bandeiras oficiais de todas as 22 seleções
+    // Estrutura atualizada com todas as 49 seleções para as bandeiras oficiais
     const countryCodes = {
+        "ALG (Argélia)": "dz",
+        "ANG (Inglaterra)": "gb-eng",
+        "ARG (Argentina)": "ar",
+        "ARS (Arábia Saudita)": "sa",
         "AUS (Austrália)": "au",
+        "AUT (Áustria)": "at",
+        "BEL (Bélgica)": "be",
         "BIH (Bósnia e Herzegovina)": "ba",
         "BRA (Brasil)": "br",
         "CAN (Canadá)": "ca",
         "CIV (Costa do Marfim)": "ci",
+        "COL (Colômbia)": "co",
+        "CON (Congo)": "cg",
+        "CPE (Cabo Verde)": "cv",
+        "CRO (Croácia)": "hr",
         "CUW (Curaçao)": "cw",
         "CZE (Chéquia)": "cz",
         "ECU (Equador)": "ec",
+        "EGY (Egito)": "eg",
+        "ESP (Espanha)": "es",
+        "FRA (França)": "fr",
         "FWC (Especiais / Logos)": "fwc",
+        "GAN (Gana)": "gh",
         "GER (Alemanha)": "de",
         "HAI (Haiti)": "ht",
+        "ING (Inglaterra)": "gb-eng",
+        "IRA (Irã)": "ir",
+        "IRQ (Iraque)": "iq",
+        "JOR (Jordânia)": "jo",
+        "JPN (Japão)": "jp",
         "KOR (Coreia do Sul)": "kr",
         "MAR (Marrocos)": "ma",
         "MEX (México)": "mx",
         "NED (Países Baixos)": "nl",
+        "NOR (Noruega)": "no",
+        "NZL (Nova Zelândia)": "nz",
+        "PAN (Panamá)": "pa",
         "PAR (Paraguai)": "py",
+        "POR (Portugal)": "pt",
         "QAT (Catar)": "qa",
         "RSA (África do Sul)": "za",
         "SCO (Escócia)": "gb-sct",
+        "SEN (Senegal)": "sn",
         "SUI (Suíça)": "ch",
+        "SWE (Suécia)": "se",
+        "TUN (Tunísia)": "tn",
         "TUR (Turquia)": "tr",
-        "USA (Estados Unidos)": "us"
+        "URU (Uruguai)": "uy",
+        "USA (Estados Unidos)": "us",
+        "UZB (Uzbequistão)": "uz"
     };
 
-    // Figurinhas que você JÁ TEM (carregadas no banco se ele estiver vazio)
+    // Suas figurinhas iniciais (as novas seleções começam zeradas para vocês marcarem no site)
     const initialOwned = {
         "FWC (Especiais / Logos)": [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18],
         "MEX (México)": [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20],
