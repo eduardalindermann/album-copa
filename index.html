@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Álbum da Copa - Figurinhas Que Eu Tenho</title>
+    <title>Nosso Álbum da Copa - Du & Nick</title>
     <style>
         :root {
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
-            --primary-color: #8a1538; /* Grená da Copa */
-            --accent-color: #4caf50;  /* Verde para as que você já tem */
-            --missing-color: #f8f9fa; /* Cinza claro para as que faltam */
+            --primary-color: #8a1538;
+            --accent-color: #4caf50;
+            --missing-color: #f8f9fa;
             --text-color: #333333;
             --border-color: #e0e0e0;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
@@ -22,12 +21,7 @@
             margin: 0;
             padding: 20px;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 800px; margin: 0 auto; }
         header {
             text-align: center;
             margin-bottom: 25px;
@@ -37,19 +31,13 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
-        h1 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
-        }
-
+        h1 { margin: 0 0 10px 0; font-size: 24px; }
         .progress-container {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 3px;
             margin-top: 10px;
         }
-
         .progress-bar {
             background: var(--accent-color);
             width: 0%;
@@ -57,38 +45,7 @@
             border-radius: 8px;
             transition: width 0.3s ease;
         }
-
-        #stats-text {
-            font-size: 14px;
-            margin-top: 5px;
-            display: block;
-        }
-
-        .action-box {
-            background: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background-color: #610f27;
-        }
-
+        #stats-text { font-size: 14px; margin-top: 5px; display: block; }
         .country-card {
             background: var(--card-bg);
             border-radius: 12px;
@@ -97,7 +54,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border-left: 5px solid var(--primary-color);
         }
-
         .country-header {
             display: flex;
             justify-content: space-between;
@@ -106,7 +62,6 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
         }
-
         .country-name {
             font-weight: bold;
             font-size: 16px;
@@ -115,14 +70,12 @@
             align-items: center;
             gap: 10px;
         }
-
         .flag-img {
             width: 24px;
             height: auto;
             border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
         .country-count {
             font-size: 12px;
             background: #eee;
@@ -130,13 +83,11 @@
             border-radius: 12px;
             font-weight: 600;
         }
-
         .stickers-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
             gap: 8px;
         }
-
         .sticker {
             display: flex;
             align-items: center;
@@ -150,65 +101,52 @@
             user-select: none;
             transition: all 0.2s ease;
             font-size: 14px;
-            color: #ccc; /* Cor apagada para as que faltam */
+            color: #ccc;
         }
-
-        /* Quando você já TEM a figurinha (Fica verde e destacada) */
         .sticker.checked {
             background-color: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
-            opacity: 1;
         }
     </style>
+
+    <!-- Inclusão dos scripts oficiais do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Progresso do Meu Álbum</h1>
+        <h1>Painel do Nosso Álbum</h1>
         <div class="progress-container">
             <div class="progress-bar" id="main-progress"></div>
         </div>
-        <span id="stats-text">Carregando dados...</span>
+        <span id="stats-text">Conectando ao banco de dados...</span>
     </header>
-
-    <div class="action-box">
-        <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">Clique abaixo para gerar um link atualizado com suas marcações para abrir em qualquer lugar:</p>
-        <button class="btn" onclick="generateShareLink()">🔗 Salvar e Gerar Link de Compartilhamento</button>
-    </div>
 
     <div id="album-list"></div>
 </div>
 
 <script>
-    // As figurinhas que você informou que JÁ TEM de início
-    const initialOwned = {
-        "FWC (Especiais / Logos)": [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18],
-        "MEX (México)": [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20],
-        "RSA (África do Sul)": [2, 3, 5, 6, 7, 9, 11, 19],
-        "KOR (Coreia do Sul)": [2, 5, 6, 7, 13, 17, 19],
-        "CZE (Chéquia)": [1, 3, 4, 5, 7, 9, 11, 13, 14, 16, 17, 18, 20],
-        "CAN (Canadá)": [2, 3, 8, 9, 17, 18, 20],
-        "BIH (Bósnia e Herzegovina)": [1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 18, 19, 20],
-        "QAT (Catar)": [1, 2, 4, 6, 8, 9, 10, 12, 18, 19, 20],
-        "SUI (Suíça)": [3, 4, 7, 10, 11, 13, 15, 17, 18, 19, 20],
-        "BRA (Brasil)": [3, 4, 7, 8, 9, 11, 12, 16, 17, 19, 20],
-        "MAR (Marrocos)": [3, 10, 14, 16, 19, 20],
-        "HAI (Haiti)": [1, 3, 4, 7, 8, 9, 12, 13, 14, 17, 20],
-        "SCO (Escócia)": [1, 2, 16],
-        "USA (Estados Unidos)": [2, 7, 11, 17, 18],
-        "PAR (Paraguai)": [1, 3, 4, 5, 8, 17],
-        "AUS (Austrália)": [1, 2, 3, 5, 6, 9, 10, 11, 14, 15, 17, 18],
-        "TUR (Turquia)": [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 17, 18, 19],
-        "GER (Alemanha)": [1, 2, 3, 6, 7, 9, 10, 12, 13, 15, 17, 19],
-        "CUW (Curaçao)": [1, 3, 5, 14, 16],
-        "CIV (Costa do Marfim)": [3, 5, 8, 9, 10, 12, 13, 15, 19, 20],
-        "ECU (Equador)": [8, 12, 13, 16, 20],
-        "NED (Países Baixos)": [1, 2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 18, 19, 20]
+    // Suas credenciais do Firebase configuradas
+    const firebaseConfig = {
+        apiKey: "AIzaSyBuXB4vvqWrSZUQvyPQeDzz2Rrgyfv3hjg",
+        authDomain: "albumcopa-13fae.firebaseapp.com",
+        databaseURL: "https://albumcopa-13fae-default-rtdb.firebaseio.com",
+        projectId: "albumcopa-13fae",
+        storageBucket: "albumcopa-13fae.firebasestorage.app",
+        messagingSenderId: "716820077727",
+        appId: "1:716820077727:web:632cf1d1afdc311b76d6aa"
     };
 
-    // Mapeamento dos códigos de bandeira das seleções
+    // Inicializando os módulos
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const docRef = db.collection("album").doc("progresso");
+
+    // CONTINUA NA PARTE 2...
+    // Estrutura com os códigos das bandeiras oficiais de todas as 22 seleções
     const countryCodes = {
         "AUS (Austrália)": "au",
         "BIH (Bósnia e Herzegovina)": "ba",
@@ -234,38 +172,36 @@
         "USA (Estados Unidos)": "us"
     };
 
+    // Suas figurinhas que vocês JÁ TÊM (Carregadas automaticamente no primeiro acesso se o banco estiver vazio)
+    const initialOwned = {
+        "FWC (Especiais / Logos)": [1, 2, 3, 10, 12, 13, 14, 15, 16, 17, 18],
+        "MEX (México)": [1, 2, 6, 7, 9, 10, 13, 16, 17, 18, 19, 20],
+        "RSA (África do Sul)": [2, 3, 5, 6, 7, 9, 11, 19],
+        "KOR (Coreia do Sul)": [2, 5, 6, 7, 13, 17, 19],
+        "CZE (Chéquia)": [1, 3, 4, 5, 7, 9, 11, 13, 14, 16, 17, 18, 20],
+        "CAN (Canadá)": [2, 3, 8, 9, 17, 18, 20],
+        "BIH (Bósnia e Herzegovina)": [1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 18, 19, 20],
+        "QAT (Catar)": [1, 2, 4, 6, 8, 9, 10, 12, 18, 19, 20],
+        "SUI (Suíça)": [3, 4, 7, 10, 11, 13, 15, 17, 18, 19, 20],
+        "BRA (Brasil)": [3, 4, 7, 8, 9, 11, 12, 16, 17, 19, 20],
+        "MAR (Marrocos)": [3, 10, 14, 16, 19, 20],
+        "HAI (Haiti)": [1, 3, 4, 7, 8, 9, 12, 13, 14, 17, 20],
+        "SCO (Escócia)": [1, 2, 16],
+        "USA (Estados Unidos)": [2, 7, 11, 17, 18],
+        "PAR (Paraguai)": [1, 3, 4, 5, 8, 17],
+        "AUS (Austrália)": [1, 2, 3, 5, 6, 9, 10, 11, 14, 15, 17, 18],
+        "TUR (Turquia)": [1, 2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 14, 17, 18, 19],
+        "GER (Alemanha)": [1, 2, 3, 6, 7, 9, 10, 12, 13, 15, 17, 19],
+        "CUW (Curaçao)": [1, 3, 5, 14, 16],
+        "CIV (Costa do Marfim)": [3, 5, 8, 9, 10, 12, 13, 15, 19, 20],
+        "ECU (Equador)": [8, 12, 13, 16, 20],
+        "NED (Países Baixos)": [1, 2, 4, 5, 6, 9, 10, 11, 14, 15, 16, 18, 19, 20]
+    };
+
     const container = document.getElementById('album-list');
-    
-    // Tenta ler os dados salvos (Pela URL ou pelo LocalStorage do navegador)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlData = urlParams.get('d');
-    let savedState = null;
+    let currentState = {};
 
-    if (urlData) {
-        try {
-            savedState = JSON.parse(atob(urlData));
-            localStorage.setItem('copaStickersStateV2', JSON.stringify(savedState));
-        } catch(e) {
-            console.error("Erro ao ler dados da URL");
-        }
-    }
-
-    if (!savedState) {
-        const localData = localStorage.getItem('copaStickersStateV2');
-        if (localData) {
-            savedState = JSON.parse(localData);
-        } else {
-            // Se for a primeira vez abrindo sem histórico, popula com a sua lista inicial que você já tem
-            savedState = {};
-            Object.keys(initialOwned).forEach(country => {
-                initialOwned[country].forEach(num => {
-                    savedState[`${country}-${num}`] = true;
-                });
-            });
-        }
-    }
-
-    // Renderiza todas as seleções fixas de 1 a 20
+    // Monta a interface na tela com grids de 1 a 20 para cada país
     Object.keys(countryCodes).forEach(country => {
         const card = document.createElement('div');
         card.className = 'country-card';
@@ -290,7 +226,6 @@
         const grid = document.createElement('div');
         grid.className = 'stickers-grid';
 
-        // Loop obrigatório de 1 a 20 para todas as seleções
         for (let num = 1; num <= 20; num++) {
             const btn = document.createElement('div');
             btn.className = 'sticker';
@@ -298,22 +233,23 @@
             
             const idUnique = `${country}-${num}`;
             btn.dataset.id = idUnique; 
+            btn.id = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-            if (savedState[idUnique]) {
-                btn.classList.add('checked');
-            }
-            
+            // Quando clicar na figurinha, envia a atualização direto pro Firebase
             btn.addEventListener('click', () => {
+                const isChecked = btn.classList.contains('checked');
+                
+                // Atualiza localmente rápido para dar sensação de clique instantâneo
                 btn.classList.toggle('checked');
                 
-                if (btn.classList.contains('checked')) {
-                    savedState[idUnique] = true;
-                } else {
-                    delete savedState[idUnique];
-                }
-                
-                localStorage.setItem('copaStickersStateV2', JSON.stringify(savedState));
-                updateProgress();
+                // Salva a alteração no documento único do banco de dados
+                docRef.set({
+                    [idUnique]: !isChecked
+                }, { merge: true }).catch(err => {
+                    console.error("Erro ao salvar no banco: ", err);
+                    // Desfaz a cor do botão se a gravação falhar (ex: falta de internet)
+                    btn.classList.toggle('checked');
+                });
             });
 
             grid.appendChild(btn);
@@ -323,37 +259,59 @@
         container.appendChild(card);
     });
 
+    // 🔄 O SEGREDO DO TEMPO REAL: Fica ouvindo o banco de dados sem parar
+    docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            currentState = doc.data();
+            applyStateToUI();
+        } else {
+            // Se o banco de dados estiver totalmente limpo, cria ele com a sua lista inicial
+            let startData = {};
+            Object.keys(initialOwned).forEach(country => {
+                initialOwned[country].forEach(num => {
+                    startData[`${country}-${num}`] = true;
+                });
+            });
+            docRef.set(startData);
+        }
+    });
+
+    // Aplica visualmente as marcações verdes que vieram da nuvem
+    function applyStateToUI() {
+        const allButtons = document.querySelectorAll('.sticker');
+        
+        // Primeiro limpa o estado de tudo
+        allButtons.forEach(btn => btn.classList.remove('checked'));
+
+        // Depois acende as que estão marcadas como "true" na nuvem
+        Object.keys(currentState).forEach(idUnique => {
+            if (currentState[idUnique] === true) {
+                const safeId = `btn-${idUnique.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const btn = document.getElementById(safeId);
+                if (btn) btn.classList.add('checked');
+            }
+        });
+
+        updateProgress();
+    }
+
+    // Atualiza a barra vermelha e os contadores numéricos
     function updateProgress() {
-        const totalStickers = document.querySelectorAll('.sticker').length; // 22 países * 20 = 440 total
+        const totalStickers = document.querySelectorAll('.sticker').length;
         const checkedStickers = document.querySelectorAll('.sticker.checked').length;
         const missing = totalStickers - checkedStickers;
         
         const percentage = totalStickers > 0 ? (checkedStickers / totalStickers) * 100 : 0;
         document.getElementById('main-progress').style.width = `${percentage}%`;
-        document.getElementById('stats-text').innerText = `Você tem ${checkedStickers} de ${totalStickers} figurinhas (${percentage.toFixed(1)}% do álbum). Faltam ${missing}!`;
+        document.getElementById('stats-text').innerText = `Vocês têm ${checkedStickers} de ${totalStickers} figurinhas (${percentage.toFixed(1)}% do álbum). Faltam ${missing}!`;
 
         Object.keys(countryCodes).forEach(country => {
             const countryCard = document.getElementById(`count-${country}`).closest('.country-card');
             const checkedCountry = countryCard.querySelectorAll('.sticker.checked').length;
             
-            document.getElementById(`count-${country}`).innerText = `Tenho: ${checkedCountry}/20`;
+            document.getElementById(`count-${country}`).innerText = `Temos: ${checkedCountry}/20`;
         });
     }
-
-    function generateShareLink() {
-        const base64Data = btoa(JSON.stringify(savedState));
-        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?d=' + base64Data;
-        
-        window.history.pushState({path:newUrl},'',newUrl);
-        
-        navigator.clipboard.writeText(newUrl).then(() => {
-            alert("Link atualizado copiado com sucesso! Guarde este link para não perder o progresso caso acesse de outro dispositivo.");
-        }).catch(err => {
-            alert("Link gerado na barra de endereços do seu navegador! Copie lá de cima.");
-        });
-    }
-
-    updateProgress();
 </script>
 
 </body>
