@@ -5,60 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Álbum da Copa - Duda e Nicho</title>
     <style>
-       header {
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary-color: #8a1538;
+            --accent-color: #4caf50;
+            --missing-color: #f8f9fa;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        header {
             text-align: center;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #6b0f2b, var(--primary-color));
+            margin-bottom: 25px;
+            background: var(--primary-color);
             color: white;
-            padding: 30px 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(138, 21, 56, 0.15);
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        h1 { 
-            margin: 0 0 15px 0; 
-            font-size: 26px; 
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
-        }
+        h1 { margin: 0 0 10px 0; font-size: 24px; }
         .progress-container {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 4px;
-            margin: 15px auto 5px auto;
-            max-width: 90%;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 3px;
+            margin-top: 10px;
         }
         .progress-bar {
-            background: linear-gradient(90deg, #4caf50, #66bb6a);
+            background: var(--accent-color);
             width: 0%;
-            height: 14px;
-            border-radius: 20px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+            height: 12px;
+            border-radius: 8px;
+            transition: width 0.3s ease;
         }
-        #stats-text { 
-            font-size: 13px; 
-            font-weight: 500;
-            margin-top: 10px; 
-            display: block; 
-            color: rgba(255, 255, 255, 0.85);
-            letter-spacing: 0.2px;
+        #stats-text { font-size: 14px; margin-top: 5px; display: block; }
+        .country-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+        .country-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .country-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .flag-img {
+            width: 24px;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .country-count {
+            font-size: 12px;
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
         }
         .stickers-grid {
             display: grid;
