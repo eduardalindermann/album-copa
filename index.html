@@ -143,55 +143,69 @@
     const dbRef = db.ref("progresso");
     // Estrutura corrigida com todas as 48 seleções e suas bandeiras oficiais
     const countryCodes = {
-        "ALG (Argélia)": "dz",
-        "ARG (Argentina)": "ar",
-        "ARS (Arábia Saudita)": "sa",
-        "AUS (Austrália)": "au",
-        "AUT (Áustria)": "at",
-        "BEL (Bélgica)": "be",
-        "BIH (Bósnia e Herzegovina)": "ba",
-        "BRA (Brasil)": "br",
-        "CAN (Canadá)": "ca",
-        "CIV (Costa do Marfim)": "ci",
-        "COL (Colômbia)": "co",
-        "CON (Congo)": "cg",
-        "CPE (Cabo Verde)": "cv",
-        "CRO (Croácia)": "hr",
-        "CUW (Curaçao)": "cw",
-        "CZE (Chéquia)": "cz",
-        "ECU (Equador)": "ec",
-        "EGY (Egito)": "eg",
-        "ESP (Espanha)": "es",
-        "FRA (França)": "fr",
-        "FWC (Especiais  Logos)": "fwc",
-        "GAN (Gana)": "gh",
-        "GER (Alemanha)": "de",
-        "HAI (Haiti)": "ht",
-        "ING (Inglaterra)": "gb-eng",
-        "IRA (Irã)": "ir",
-        "IRQ (Iraque)": "iq",
-        "JOR (Jordânia)": "jo",
-        "JPN (Japão)": "jp",
-        "KOR (Coreia do Sul)": "kr",
-        "MAR (Marrocos)": "ma",
+        // Bloco 1
         "MEX (México)": "mx",
-        "NED (Países Baixos)": "nl",
-        "NOR (Noruega)": "no",
-        "NZL (Nova Zelândia)": "nz",
-        "PAN (Panamá)": "pa",
-        "PAR (Paraguai)": "py",
-        "POR (Portugal)": "pt",
-        "QAT (Catar)": "qa",
         "RSA (África do Sul)": "za",
-        "SCO (Escócia)": "gb-sct",
-        "SEN (Senegal)": "sn",
+        "KOR (Coreia do Sul)": "kr",
+        "CZE (Chéquia)": "cz",
+        // Bloco 2
+        "CAN (Canadá)": "ca",
+        "BIH (Bósnia e Herzegovina)": "ba",
+        "QAT (Catar)": "qa",
         "SUI (Suíça)": "ch",
+        // Bloco 3
+        "BRA (Brasil)": "br",
+        "MAR (Marrocos)": "ma",
+        "HAI (Haiti)": "ht",
+        "SCO (Escócia)": "gb-sct",
+        // Bloco 4
+        "USA (Estados Unidos)": "us",
+        "PAR (Paraguai)": "py",
+        "AUS (Austrália)": "au",
+        "TUR (Turquia)": "tr",
+        // Bloco 5
+        "GER (Alemanha)": "de",
+        "CUW (Curaçao)": "cw",
+        "CIV (Costa do Marfim)": "ci",
+        "ECU (Equador)": "ec",
+        // Bloco 6
+        "NED (Países Baixos)": "nl",
+        "JPN (Japão)": "jp",
         "SWE (Suécia)": "se",
         "TUN (Tunísia)": "tn",
-        "TUR (Turquia)": "tr",
+        // Bloco 7
+        "BEL (Bélgica)": "be",
+        "EGY (Egito)": "eg",
+        "IRA (Irã)": "ir",
+        "NZL (Nova Zelândia)": "nz",
+        // Bloco 8
+        "ESP (Espanha)": "es",
+        "CPE (Cabo Verde)": "cv",
+        "ARS (Arábia Saudita)": "sa",
         "URU (Uruguai)": "uy",
-        "USA (Estados Unidos)": "us",
-        "UZB (Uzbequistão)": "uz"
+        // Bloco 9
+        "FRA (França)": "fr",
+        "SEN (Senegal)": "sn",
+        "IRQ (Iraque)": "iq",
+        "NOR (Noruega)": "no",
+        // Bloco 10
+        "ARG (Argentina)": "ar",
+        "ALG (Argélia)": "dz",
+        "AUT (Áustria)": "at",
+        "JOR (Jordânia)": "jo",
+        // Bloco 11
+        "POR (Portugal)": "pt",
+        "CON (Congo)": "cg",
+        "UZB (Uzbequistão)": "uz",
+        "COL (Colômbia)": "co",
+        // Bloco 12
+        "ING (Inglaterra)": "gb-eng",
+        "CRO (Croácia)": "hr",
+        "GAN (Gana)": "gh",
+        "PAN (Panamá)": "pa",
+        // Extras
+        "FWC (Especiais  Logos)": "fwc",
+        "Coca-Cola": "coca"
     };
 
     // Suas figurinhas iniciais
@@ -247,7 +261,8 @@
         const grid = document.createElement('div');
         grid.className = 'stickers-grid';
 
-        for (let num = 1; num <= 20; num++) {
+        const limiteTotal = (country === "Coca-Cola") ? 14 : 20;
+for (let num = 1; num <= limiteTotal; num++) {
             const btn = document.createElement('div');
             btn.className = 'sticker';
             btn.innerText = num;
@@ -325,7 +340,8 @@
         Object.keys(countryCodes).forEach(country => {
             const countryCard = document.getElementById(`count-${country}`).closest('.country-card');
             const checkedCountry = countryCard.querySelectorAll('.sticker.checked').length;
-            document.getElementById(`count-${country}`).innerText = `Temos: ${checkedCountry}/20`;
+            const limiteContador = (country === "Coca-Cola") ? 14 : 20;
+document.getElementById(`count-${country}`).innerText = `Temos: ${checkedCountry}/${limiteContador}`;
         });
     }
 </script>
